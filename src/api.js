@@ -38,3 +38,17 @@ export const unsubscribeFromTicker = ticker => {
 };
 
 setInterval(loadAllTikers, 5e3);
+
+const socket_URL = `wss://streamer.cryptocompare.com/v2?api_key=${API_KEY}`;
+
+const socket = new WebSocket(socket_URL);
+socket.send(
+  JSON.stringify({
+    action: "SubAdd",
+    subs: [[...tickers.keys()].join(",")]
+  })
+);
+
+socket.addEventListener("message",()=>{
+  
+})

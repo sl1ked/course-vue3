@@ -196,7 +196,7 @@
 </template>
 
 <script>
-import { unsubscribeFromTicker, subscribeToTicker } from "./api.js";
+import { unsubscribeFromTicker, subscribeToTicker } from "./webSoket.js";
 
 export default {
   name: "App",
@@ -237,7 +237,11 @@ export default {
       const minValue = Math.min(...this.graph);
       const distance = maxValue - minValue;
       const FULL = 100;
-      return this.graph.map(el => (FULL * (el - minValue)) / distance || FULL);
+      return this.graph.map(el =>
+        Number.isFinite((FULL * (el - minValue)) / distance)
+          ? (FULL * (el - minValue)) / distance + 1
+          : FULL
+      );
     },
     filteredTickers() {
       const countTickers = 6;
@@ -279,18 +283,8 @@ export default {
         .forEach(t => {
           t.price = price;
         });
+      this.graph.push(price);
     },
-    async updatePrice() {
-      // if (!this.tickers.length) {
-      //   return;
-      // }
-      // const exchangeData = await loadAllTikers(this.tickers.map(el => el.name));
-      // this.tickers.forEach(element => {
-      //   const price = exchangeData[element.name];
-      //   element.price = price ? this.validPrice(price) : "-";
-      // });
-    },
-
     add(ticker = this.ticker) {
       if (
         this.ticker &&
