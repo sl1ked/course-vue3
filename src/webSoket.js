@@ -2,16 +2,25 @@ const API_KEY =
   "bbef926e7c0109013f37585828c4092e1ae49d0d2333177e14eac4a0fe1e73db";
 const socket_URL = `wss://streamer.cryptocompare.com/v2?api_key=${API_KEY}`;
 const AGGREGATE_INDEX = "5";
+const ERROR_INDEX = "500";
 
 const tickers = new Map();
+let validate;
 
 const socket = new WebSocket(socket_URL);
 
 socket.addEventListener("message", el => {
-  const { TYPE: type, FROMSYMBOL: currency, PRICE: newPrice } = JSON.parse(
-    el.data
-  );
+  const {
+    TYPE: type,
+    FROMSYMBOL: currency,
+    PRICE: newPrice,
+    PARAMETER: errorName
+  } = JSON.parse(el.data);
   if (type !== AGGREGATE_INDEX || newPrice === undefined) {
+    if (type === ERROR_INDEX) {
+      // console.log(errorName + " undefined");
+      validate(errorName.split("~")[2]);
+    }
     return;
   }
   const handlers = tickers.get(currency) || [];
@@ -52,4 +61,8 @@ export const unsubscribeFromTicker = ticker => {
   tickers.delete(ticker);
   removesubscribeOnWs(ticker);
   window.ticker = tickers;
+};
+
+export const chengeValidStyle = cb => {
+  validate=cb;
 };

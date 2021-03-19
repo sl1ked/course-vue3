@@ -112,7 +112,9 @@
           :key="tick.name"
           @click="select(tick)"
           :class="{
-            'border-4': sel === tick
+            'border-4': sel === tick,
+            'bg-red-100': !tick.valid,
+            'bg-red-byte': tick.valid
           }"
           class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
         >
@@ -196,7 +198,11 @@
 </template>
 
 <script>
-import { unsubscribeFromTicker, subscribeToTicker } from "./webSoket.js";
+import {
+  unsubscribeFromTicker,
+  subscribeToTicker,
+  chengeValidStyle
+} from "./webSoket.js";
 
 export default {
   name: "App",
@@ -215,6 +221,7 @@ export default {
     };
   },
   created: function() {
+    chengeValidStyle(this.chengeValidStyle);
     const windowData = Object.fromEntries(
       new URL(window.location).searchParams.entries()
     );
@@ -225,8 +232,8 @@ export default {
     if (data.length) {
       this.tickers = JSON.parse(data);
       this.tickers.forEach(ticker => {
-        subscribeToTicker(ticker.name, newPrice =>
-          this.updateTiker(ticker.name, newPrice)
+        subscribeToTicker(ticker.name.toUpperCase(), newPrice =>
+          this.updateTiker(ticker.name.toUpperCase(), newPrice)
         );
       });
     }
@@ -274,6 +281,11 @@ export default {
       .then(() => (this.showForm = false));
   },
   methods: {
+    chengeValidStyle(elementName) {
+      this.tickers
+        .filter(t => t.name === elementName)
+        .forEach(t => (t.valid = false));
+    },
     validPrice(price) {
       return price > 1 ? price.toFixed(2) : price.toPrecision(4);
     },
@@ -292,14 +304,16 @@ export default {
       ) {
         this.showValidMesage = false;
         const newTicker = {
-          name: ticker,
-          price: "-"
+          name: ticker.toUpperCase(),
+          price: "-",
+          valid: true
         };
         this.tickers = [...this.tickers, newTicker];
         this.ticker = "";
         subscribeToTicker(newTicker.name, newPrice =>
           this.updateTiker(newTicker.name, newPrice)
         );
+
         this.searchList = [];
       } else {
         this.showValidMesage = true;
