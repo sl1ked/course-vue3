@@ -64,5 +64,5 @@ export const unsubscribeFromTicker = ticker => {
 };
 
 export const chengeValidStyle = cb => {
-  validate=cb;
+  validate = cb;
 };
