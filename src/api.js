@@ -52,3 +52,7 @@ socket.send(
 socket.addEventListener("message",()=>{
   
 })
+export const backSubscribeTickets = ticker => {
+  tickers.delete(ticker);
+  window.ticker = tickers;
+};
